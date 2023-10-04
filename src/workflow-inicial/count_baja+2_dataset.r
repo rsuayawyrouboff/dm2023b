@@ -5,6 +5,7 @@ gc(full = TRUE) # garbage collection
 require("data.table")
 require("yaml")
 
-# cargo el dataset
+setwd("~/buckets/b1/")
 dataset <- fread("./datasets/competencia_2023.csv.gz")
 
+clase_por_mes <- as.data.table (dataset[,.N,list(foto_mes,clase_ternaria)])
