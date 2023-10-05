@@ -11,15 +11,15 @@ require("yaml")
 
 # Parametros del script
 PARAM <- list()
-PARAM$experimento <- "DR6210_3"
+PARAM$experimento <- "DR6210_03"
 
-PARAM$exp_input <- "CA6110_3"
+PARAM$exp_input <- "CA6110_03"
 
 PARAM$variables_intrames <- TRUE # atencion esto esta en TRUE
 
 # valores posibles
 #  "ninguno", "rank_simple", "rank_cero_fijo", "deflacion", "estandarizar"
-PARAM$metodo <- "rank_simple"
+PARAM$metodo <- "rank_cero_fijo"
 
 PARAM$home <- "~/buckets/b1/"
 # FIN Parametros del script
@@ -49,8 +49,12 @@ AgregarVariables_IntraMes <- function(dataset) {
   # creo un ctr_quarter que tenga en cuenta cuando
   # los clientes hace 3 menos meses que estan
   dataset[, ctrx_quarter_normalizado := ctrx_quarter]
-  dataset[cliente_antiguedad == 1, ctrx_quarter_normalizado := ctrx_quarter * 3]
-  dataset[cliente_antiguedad == 2, ctrx_quarter_normalizado := ctrx_quarter * 1.5]
+  dataset[cliente_antiguedad == 1, ctrx_quarter_normalizado := ctrx_quarter * 5]
+  dataset[cliente_antiguedad == 2, ctrx_quarter_normalizado := ctrx_quarter * 2]
+  dataset[
+    cliente_antiguedad == 3,
+    ctrx_quarter_normalizado := ctrx_quarter * 1.2
+  ]
 
   # variable extraida de una tesis de maestria de Irlanda
   dataset[, mpayroll_sobre_edad := mpayroll / cliente_edad]
@@ -125,29 +129,6 @@ AgregarVariables_IntraMes <- function(dataset) {
   dataset[, vmr_mpagominimo := vm_mpagominimo / vm_mlimitecompra]
 
   # Aqui debe usted agregar sus propias nuevas variables
-  
-  dataset[, saldo_sobre_payroll := mcuentas_saldo / mpayroll]
-  dataset[, mdebitos_sobre_saldo := mcuenta_debitos_automaticos / mcuentas_saldo]
-  dataset[, comisiones_sobre_saldo := mcomisiones_mantenimiento / mcuentas_saldo]
-  dataset[, transferencias_sobre_saldo := mtransferencias_emitidas / mcuentas_saldo]
-  dataset[, extracciones_sobre_saldo := mextraccion_autoservicio / mcuentas_saldo]
-  
-  dataset[, transacciones_hb_sobre_quarter := chomebanking_transacciones / ctrx_quarter]
-  dataset[, transacciones_caja_sobre_quarter := ccajas_extracciones / ctrx_quarter]
-  dataset[, transacciones_call_sobre_quarter := ccallcenter_transacciones / ctrx_quarter]
-  
-  dataset[, quarter_por_producto := ctrx_quarter / cproductos]
-  
-  dataset[, nuevo_y_pocos_productos := ifelse(cliente_antiguedad < 12 & cproductos < 7, 1, 0)]
-  dataset[, nuevo_y_muchos_productos := ifelse(cliente_antiguedad < 12 & cproductos >= 7, 1, 0)]
-  dataset[, antiguo_y_pocos_productos := ifelse(cliente_antiguedad >= 12 & cproductos < 7, 1, 0)]
-  dataset[, antiguo_y_muchos_productos := ifelse(cliente_antiguedad >= 12 & cproductos >= 7, 1, 0)]
-  
-  dataset[, pocos_productos_pocas_trx := ifelse(cproductos < 7 & ctrx_quarter < 110, 1, 0)]
-  dataset[, muchos_productos_pocas_trx := ifelse(cproductos >= 7 & ctrx_quarter < 110, 1, 0)]
-  dataset[, pocos_productos_muchas_trx := ifelse(cproductos < 7 & ctrx_quarter >= 110, 1, 0)]
-  dataset[, muchos_productos_muchas_trx := ifelse(cproductos >= 7 & ctrx_quarter >= 110, 1, 0)]
-  
 
   # valvula de seguridad para evitar valores infinitos
   # paso los infinitos a NULOS
